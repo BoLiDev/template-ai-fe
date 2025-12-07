@@ -7,6 +7,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
  * 1. Managing message history (user and assistant)
  * 2. Handling streaming response output and adapting the data structure
  * 3. Managing chat switching - chatid (TODO)
+ * 4. Currently the user chat is stored in FE.
  */
 export class Chat {
   private readonly _openai = createOpenAI({
