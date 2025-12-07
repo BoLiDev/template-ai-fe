@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders App correctly and matches snapshot 1`] = `
+<div
+  class="flex items-center justify-center min-h-screen bg-gradient-to-br from-white to-gray-100 italic"
+  data-testid="app"
+>
+  <div
+    class="bg-white/80 backdrop-blur-md rounded-2xl shadow-md px-12 py-16 text-center"
+  >
+    <h1
+      class="text-5xl font-extrabold text-gray-900 mb-4 tracking-tight"
+    >
+      Hello React
+    </h1>
+    <p
+      class="text-lg text-gray-400 font-light"
+    >
+      Start Your React Project Here
+    </p>
+  </div>
+</div>
+`;

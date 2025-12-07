@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+
+@import '../public/font/monolisa-webfont.css';
+
+body {
+  font-family: ml, 'Fira Mono', 'Menlo', 'Consolas', monospace;
+}
