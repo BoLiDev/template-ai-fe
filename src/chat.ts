@@ -57,7 +57,7 @@ export class Chat {
         }
         if (chunk.type === 'text-start') {
           this._messages.push({
-            id: crypto.randomUUID(),
+            id: chunk.id,
             role: 'assistant',
             parts: [],
           });

@@ -19,8 +19,6 @@ const App: FC = observer(() => {
 
   const isStreaming = chat.status === 'streaming';
 
-  console.log(chat.messages);
-
   return (
     <div className="flex flex-col h-screen bg-stone-50">
       {/* Header */}
