@@ -18,7 +18,12 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.53",
+    "@ai-sdk/google": "^2.0.44",
     "@tailwindcss/vite": "^4.1.11",
+    "ai": "^5.0.108",
+    "mobx": "^6.15.0",
+    "mobx-react-lite": "^4.1.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.11"
