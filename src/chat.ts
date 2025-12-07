@@ -1,6 +1,6 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
 import { convertToModelMessages, streamText, UIMessage } from 'ai';
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 
 /**
  * Difficulties:
@@ -9,11 +9,11 @@ import { makeAutoObservable } from 'mobx';
  * 3. Managing chat switching - chatid (TODO)
  */
 export class Chat {
-  private readonly _google = createGoogleGenerativeAI({
-    apiKey: import.meta.env['GOOGLE_GENERATIVE_AI_API_KEY'],
+  private readonly _openai = createOpenAI({
+    apiKey: import.meta.env['OPENAI_API_KEY'],
   });
   private _messages: UIMessage[] = [];
-  private _status: 'idle' | 'streaming' = 'idle';
+  private _status: 'idle' | 'streaming' | 'error' = 'idle';
 
   constructor() {
     makeAutoObservable(this);
@@ -23,54 +23,56 @@ export class Chat {
     return this._messages;
   }
 
-  public get status(): 'idle' | 'streaming' {
+  public get status(): 'idle' | 'streaming' | 'error' {
     return this._status;
   }
 
   public sendMessage(message: string): void {
-    this._messages.push({
-      id: crypto.randomUUID(),
-      role: 'user',
-      parts: [
-        {
-          type: 'text',
-          text: message,
-        },
-      ],
-    });
-
-    this.stream();
+    this._messages.push(this.createUserMessage(message));
+    this.streamChatResponse();
   }
 
-  private async stream(): Promise<void> {
+  private async streamChatResponse(): Promise<void> {
     try {
       const streamTextResult = streamText({
-        model: this._google('gemini-2.5-flash'),
+        model: this._openai('gpt-4o-mini'),
         messages: convertToModelMessages(this._messages),
       });
 
       const stream = streamTextResult.toUIMessageStream();
 
       for await (const chunk of stream) {
-        if (chunk.type === 'start') {
-          this._status = 'streaming';
-        }
-        if (chunk.type === 'text-start') {
-          this._messages.push({
-            id: chunk.id,
-            role: 'assistant',
-            parts: [],
-          });
-        }
-        if (chunk.type === 'text-delta') {
-          this._messages[this._messages.length - 1].parts.push({
-            type: 'text',
-            text: chunk.delta,
-          });
-        }
+        runInAction(() => {
+          if (chunk.type === 'text-start') {
+            this._status = 'streaming';
+            this._messages.push({
+              id: chunk.id,
+              role: 'assistant',
+              parts: [],
+            });
+          } else if (chunk.type === 'text-delta') {
+            this._messages[this._messages.length - 1].parts.push({
+              type: 'text',
+              text: chunk.delta,
+            });
+          } else if (chunk.type === 'text-end') {
+            this._status = 'idle';
+          }
+        });
       }
-    } finally {
-      this._status = 'idle';
+    } catch (error) {
+      runInAction(() => {
+        this._status = 'error';
+      });
+      console.error(error);
     }
+  }
+
+  private createUserMessage(message: string): UIMessage {
+    return {
+      id: crypto.randomUUID(),
+      role: 'user',
+      parts: [{ type: 'text', text: message }],
+    };
   }
 }
